@@ -1,6 +1,8 @@
 //*****************************************************************************
 // Universidad del Valle de Guatemala
 // BE3015: Electrónica Digital 2
+// Sofía Salguero - 19236
+// Código para ESP32
 //*****************************************************************************
 
 //*****************************************************************************
@@ -26,18 +28,17 @@
 //*****************************************************************************
 //Prototipos de funcion
 //*****************************************************************************
-void emaADC(void);
-void valores(void);
-void mapeo(void);
-void leds(void);
-void uart(void);
+void emaADC(void);  //Filtro para potenciómetro
+void valores(void); //Valores para desplegar en LCD
+void mapeo(void);   //Mapear función de 12 a 8 bits
+void uart(void);    //Conexión UART con Tiva C
 
 //*****************************************************************************
 //Varibles globales
 //*****************************************************************************
-int rojo = 0;
-int verde = 0;
-int azul = 0;
+int rojo = 0;   //Dato led Rojo
+int verde = 0;  //Dato led Verde
+int azul = 0;   //Dato led Azul
 
 //Variables para filtro Medio Móvil Exponencial
 float adcRaw1 = 0.0;     //Valor Crudo potenciómetro 1
@@ -51,17 +52,16 @@ uint8_t centena1, decena1, unidad1; //Led Rojo
 uint8_t centena2, decena2, unidad2; //Led Verde
 uint8_t centena3, decena3, unidad3; //Led Azul
 
-//UART
-byte mensaje = 0;
-
 //*****************************************************************************
 //configuracion
 //*****************************************************************************
 void setup()
 {
-  Serial2.begin(115200);
+  //Configuración Serial
   Serial.begin(115200);
+  Serial2.begin(115200);
 
+  //Iniciar LCD
   LCD.begin(16, 2);
 }
 
@@ -70,11 +70,12 @@ void setup()
 //*****************************************************************************
 void loop()
 {
-  uart();
-  emaADC();
-  mapeo();
-  valores();
+  uart(); //Realizar conexión UART
+  emaADC();    //Tomar valor de potenciómetro y filtrarlo
+  mapeo();     //Mapear valor para 8 bits
+  valores();  // Dividir valores para LCD
 
+  //Mostrar Valores en LCD
   LCD.setCursor(0, 0);
   LCD.print("Rojo");
   LCD.setCursor(0, 1);
@@ -119,7 +120,7 @@ void mapeo(void)
 //****************************************************************
 void valores(void)
 {
-  //Primer potenciómetro
+  //LED Rojo
   int temp1 = rojo;
   centena1 = temp1 / 100.0;
   temp1 = temp1 - centena1 * 100.0;
@@ -127,7 +128,7 @@ void valores(void)
   temp1 = temp1 - decena1 * 10.0;
   unidad1 = temp1;
 
-  //Segundo potenciómetro
+  //LED Verde
   int temp2 = verde;
   centena2 = temp2 / 100.0;
   temp2 = temp2 - centena2 * 100.0;
@@ -135,7 +136,7 @@ void valores(void)
   temp2 = temp2 - decena2 * 10.0;
   unidad2 = temp2;
 
-  //Contador
+  //LED Azul
   int temp3 = azul;
   centena3 = temp3 / 100.0;
   temp3 = temp3 - centena3 * 100.0;
@@ -145,14 +146,14 @@ void valores(void)
 }
 
 //****************************************************************
-// Lectura de computadora
+// Conexión UART con Tiva C
 //****************************************************************
 void uart(void)
 {
-  while (Serial2.available() > 0)
+  while (Serial2.available() > 0) //Mira si hay algo en el buffer
   {
-    verde = Serial2.read(); //Lee de UART2
-    Serial2.write(rojo); //Escribe en UART2
-    azul = Serial.read(); //Escribe en UART 0
+    Serial2.write(rojo); //Escribe en UART2 el valor del led Rojo
+    verde = Serial2.read(); //Lee el valor del led verde en UART2
+    //No logré que también leyera el led azul :(
   }
 }

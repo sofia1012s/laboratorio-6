@@ -1,42 +1,49 @@
 //*****************************************************************************
 // Universidad del Valle de Guatemala
 // BE3015: Electrónica Digital 2
+// Sofía Salguero - 192236
+// Código para Tiva C
 //*****************************************************************************
 
 //*****************************************************************************
 //Definicion etiquetas
 //*****************************************************************************
-#define Potenciometro2 A11
+#define Potenciometro2 A11 //Potenciómetro2
 
 //*****************************************************************************
 //Varibles globales
 //*****************************************************************************
-int brillo = 0; //Valor que toma el potenciómetro
-int brilloAzul = 0; //brillo del led Azul
-int brilloVerde = 0;
-int brilloRojo = 0;
+int brillo = 0;        //Valor que toma el potenciómetro
+int brilloAzul = 0;   //brillo del led Azul
+int brilloVerde = 0; //brillo del led Verde
+int brilloRojo = 0; //brillo del led Rojo
+
 //*****************************************************************************
 //Prototipos de funcion
 //*****************************************************************************
-void ledAzul(void);
-void botones(void);
+void ledAzul(void); //Manejar brillo de led Azul
+void botones(void); // Manejar brillo led Verde con botones
 
 //*****************************************************************************
 //configuracion
 //*****************************************************************************
-
 void setup()
 {
-  Serial2.begin(115200);
+  //Comunicación Serial
   Serial.begin(115200);
+  Serial1.begin(115200);
+  Serial2.begin(115200);
+
+  //Definición de Leds
   pinMode(BLUE_LED, OUTPUT);
   pinMode(RED_LED, OUTPUT);
   pinMode(GREEN_LED, OUTPUT);
-
-  pinMode(PUSH1, INPUT_PULLUP);
-  pinMode(PUSH2, INPUT_PULLUP);
   digitalWrite(BLUE_LED, LOW);
   digitalWrite(GREEN_LED, LOW);
+
+  //Definición de botones
+  pinMode(PUSH1, INPUT_PULLUP);
+  pinMode(PUSH2, INPUT_PULLUP);
 }
 
 //*****************************************************************************
@@ -44,42 +51,43 @@ void setup()
 //*****************************************************************************
 void loop()
 {
+  //Se manejan los leds verde y azul
   botones();
-  delay(10);
   ledAzul();
-  delay(10);
-  Serial2.write(brilloVerde); //Escribe en UART 2
-  delay(10);
+  //Se recibe el dato del led rojo para manejar el led rojo
   brilloRojo = Serial2.read(); //Lee en UART2
   analogWrite(RED_LED, brilloRojo);
+
+  Serial2.write(brilloVerde); //Escribe en UART2
   delay(10);
+  //Se muestran valores en monitor serial
   Serial.println("*****Valores para leds*****");
   Serial.print("Rojo: ");
   Serial.print(brilloRojo);
-  Serial.write('\n');
+  Serial.print('\n');
   delay(10);
   Serial.print("Verde: ");
   Serial.print(brilloVerde);
-  Serial.write('\n');
+  Serial.print('\n');
   delay(10);
   Serial.print("Azul: ");
   Serial.print(brilloAzul);
-  Serial.write('\n');
+  Serial.print('\n');
   delay(10);
 }
 
 //*****************************************************************************
-// Lectura potenciometro
+// Lectura potenciometro para led azul
 //*****************************************************************************
 void ledAzul(void)
 {
   brillo = analogRead(Potenciometro2); //Lee el valor del potenciómetro
-  brilloAzul = map(brillo, 0, 4095, 0, 255);
+  brilloAzul = map(brillo, 0, 4095, 0, 255); //Mapea de 12 a 8 bits
   analogWrite(BLUE_LED, brilloAzul);      //Escribe la cantidad del potenciometro en el brillo
 }
 
 //*****************************************************************************
-// Botones
+// Botones para controlar led verde
 //*****************************************************************************
 void botones(void)
 {
